@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英灵殿别墅 伤害计算器</title>
+    <link rel="icon" href="warface-ico.png">
+    <style>
+html,body,article {
+  min-height: 100vh;
+  margin: 0;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+:root {
+  --foreground-color: #24292e;
+  --background-color: #f6f8fa;
+  --border-color: #d1d5da;
+}
+
+body {
+  --secondary-background-color: #f6f8fa;
+  margin: 0;
+  /* padding-left: 2em;
+  padding-right: 2em; */
+  height: 100%;
+  background-color: #e2e0de;
+  font-weight: 400;
+  font-size: 14px;
+  font-family: "Menlo";
+  line-height: 1.725;
+  text-rendering: geometricPrecision;
+  flex: 1;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  /* max-width: 70rem; */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.main {
+  max-width: 500px;
+  margin: 0 auto;
+  color: var(--foreground-color);
+}
+h1 {
+  font-family: "SF Pro Display",Roboto,Noto,Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  margin-top: 2em;
+  font-size: 1.6em;
+}
+table.tb_res {
+  
+}
+table.tb_res th, td {
+  text-align: left;
+}
+th {
+  /* background-color: #f2f2f2; */
+}
+#fix {
+  font-size: 14px;
+}
+    </style>
+</head>
+<body>
+    <div class="main">
+    <h1>英灵殿别墅 伤害计算器</h1>
+
+    <div id="catg_weapons" class="catg">
+    <label for="weapons">武器选择：</label><select id="weapons" onchange="updateWeaponStats()"></select>
+    <br><label for="damage">武器伤害：</label><span id="damageValue"></span>
+    <br><label for="multiplier"></label><!--武器倍率--><span id="multiplierValue"></span>
+    <br><label for="fix">倍率修正：</label><input type="number" id="fix" value="0.00">
+    <br><br>
+    </div>
+
+    <div id="catg_enemies" class="catg">
+    <label for="enemies">敌人：</label><select id="enemies" onchange="updateEnemiesStats()"></select>
+    <label for="note"></label><span id="note"></span><!--补充说明-->
+    <br><label for="enemy_hp">血量：</label><span id="ai_hp"></span><!--AI血量-->
+    <br><label for="enemy_ap">护甲：</label><span id="ai_ap"></span><!--AI护甲-->
+    <!--<label for="enemie_pt">防护：</label>--><span id="ai_pt"></span><!--AI防护-->
+    <br><label for="enemy_abs">减伤：</label><span id="ai_abs"></span>
+    <br><label for="enemy_res">抗性：</label><span id="ai_res"></span>
+    <br><br>
+    </div>
+
+    <div id="catg_shoot" class="catg">
+    <label for="bodyPart">射击部位：</label>
+    <select id="bodyPart">
+        <option value="head">头部</option>
+        <option value="body">身体</option>
+        <option value="legs">四肢</option>
+        <!-- 添加其他设计部位的选项 -->
+    </select>
+
+    <br>
+
+    <label for="damageCount">射击次数：</label>
+    <input type="number" id="damageCount" placeholder="输入次数">
+
+    <br>
+    </div>
+
+    <button onclick="calculateDamage()">计算伤害</button>
+
+    <br>
+
+    <p id="formula"></p>
+    <table class="tb_res">
+      <tr>
+        <th id = res_dmg></th>
+        <th id = res_dmg_pcnt></th>
+      </tr>
+      <tr>
+        <th id = curr_health></th>
+        <th id = curr_health_pcnt></th>
+      </tr>
+    </table>
+    </div>
+
+    <script>
+        <!--yaoyao_qiekn Weapons config-->
+        // 武器数据
+        var weaponsData = {
+          'IWI卡梅尔': {
+            'damage' : 166,
+            'rate' : 0,
+            'head' : 6,
+            'body' : 1.05,
+            'legs' : 1.05,
+            'buff' : 1
+          },
+          'HK433': {
+            'damage' : 102,
+            'rate' : 750,
+            'head' : 6,
+            'body' : 1.05,
+            'legs' : 1.05,
+            'buff' : 1
+          },
+          '27狙' : {
+            'damage': 230,
+            'rate': 255,
+            'head' : 5,
+            'body' : 1.2,
+            'legs' : 1.05,
+            'buff' : 1
+          },
+          'Kalashnikov USA Komrad 12' : {
+            'damage': 1064,
+            'rate': 190,
+            'head' : 1.42,
+            'body' : 1.06,
+            'legs' : 0.94,
+            'buff' : 1
+          },
+        }
+        // 动态生成武器下拉框的选项
+        var weaponsSelect = document.getElementById('weapons');
+        Object.keys(weaponsData).forEach(type => {
+            var option = document.createElement('option');
+            option.value = type;
+            option.text = type;
+            weaponsSelect.add(option);
+        });
+
+        function updateWeaponStats() {
+            // 获取选择的武器类型
+            var selectWeapon = document.getElementById('weapons').value;
+
+            // 更新页面上的武器伤害和倍率
+            var damageElement = document.getElementById('damageValue');
+            var multiplierElement = document.getElementById('multiplierValue');
+
+            damageElement.innerText = weaponsData[selectWeapon].damage;
+            multiplierElement.innerText = '头部倍率：' + weaponsData[selectWeapon].head + ' ' +
+                                          '\n身体倍率：' + weaponsData[selectWeapon].body + ' ' +
+                                          '\n四肢倍率：' + weaponsData[selectWeapon].legs;
+        }
+
+        // 初始更新一次，以显示默认武器的数据
+        updateWeaponStats();
+
+        <!--[to-do] yaoyao_qiekn mods config-->
+
+        <!--yaoyao_qiekn AI config-->
+        var enemiesData = {
+          '重炮小BOSS': {
+            'hp': 21250,
+            'ap': 0,
+            'pt': {
+              'head': 0.9,
+              'body': -1,
+              'legs': -1,
+              'abs': 20,
+              'res': 0.8
+            }
+          },
+          '中井AI': {
+            'hp': 93750,
+            'ap': 0,
+            'note': 'BOSS不吃倍率，请把倍率修正为1; 例如1.42身体，修正-0.42',
+            'pt': {
+              'head': 0,
+              'body': 0,
+              'legs': 0,
+              'abs': 0,
+              'res': 0
+            }
+          },
+          '突袭兵': {
+            'hp': 100,
+            'ap': 250,
+            'pt': {
+              'head': 0.5,
+              'body': -1,
+              'legs': -1,
+              'abs': 20,
+              'res': 0.7
+            }
+          },
+          '近战手': {
+            'hp': 100,
+            'ap': 250,
+            'pt': {
+              'head': 0.5,
+              'body': -1,
+              'legs': -1,
+              'abs': 20,
+              'res': 0.7
+            }
+          },
+          '狙击手': {
+            'hp': 100,
+            'ap': 200,
+            'pt': {
+              'head': 0.4,
+              'body': -1,
+              'legs': -1,
+              'abs': 20,
+              'res': 0.5
+            }
+          },
+          '火箭筒兵': {
+            'hp': 100,
+            'ap': 200,
+            'pt': {
+              'head': 0.5,
+              'body': -1,
+              'legs': -1,
+              'abs': 20,
+              'res': 0.5
+            }
+          },
+          '重装士兵(盾牌哥)': {
+            'hp': 100,
+            'ap': 250,
+            'pt': {
+              'head': 0.9,
+              'body': -1,
+              'legs': -1,
+              'abs': 20,
+              'res': 0.7
+            }
+          },
+        }
+
+        // 动态生成敌人下拉框的选项
+        var enemiesSelect = document.getElementById('enemies');
+        Object.keys(enemiesData).forEach(type => {
+            var option = document.createElement('option');
+            option.value = type;
+            option.text = type;
+            enemiesSelect.add(option);
+        });
+
+        function updateEnemiesStats() {
+            // 获取选择的敌人类型
+            var selectedEnemy = document.getElementById('enemies').value;
+
+            // 更新敌人注释信息
+            var ai_note = document.getElementById('note');
+            ai_note.innerText = '\n注释：' + enemiesData[selectedEnemy].note;
+
+            // 更新页面上的敌人血量信息
+            var ai_hp = document.getElementById('ai_hp');
+            var ai_ap = document.getElementById('ai_ap');
+            var ai_pt = document.getElementById('ai_pt');
+
+            ai_hp.innerText = enemiesData[selectedEnemy].hp;
+            ai_ap.innerText = enemiesData[selectedEnemy].ap;
+            ai_abs.innerText = enemiesData[selectedEnemy].pt.abs;
+            ai_res.innerText = enemiesData[selectedEnemy].pt.res;
+            ai_pt.innerText = '\n头防：' + enemiesData[selectedEnemy].pt.head + ' ' +
+                              '\n身体：' + enemiesData[selectedEnemy].pt.body + ' ' +
+                              '\n四肢：' + enemiesData[selectedEnemy].pt.legs;
+        }
+        updateEnemiesStats();
+
+    
+        function calculateDamage() {
+            var selectedWeapon = document.getElementById("weapons").value;
+            var wp = weaponsData[selectedWeapon];
+            var wp_damage = weaponsData[selectedWeapon].damage;
+            var wp_head = weaponsData[selectedWeapon].head;
+            var wp_body = weaponsData[selectedWeapon].body;
+            var wp_legs = weaponsData[selectedWeapon].legs;
+
+            var selectedEnemy = document.getElementById("enemies").value;
+            var ai = enemiesData[selectedEnemy];
+            var ai_hp = enemiesData[selectedEnemy].hp;
+            var ai_ap = enemiesData[selectedEnemy].ar;
+            var ai_head = enemiesData[selectedEnemy].pt.head;
+            var ai_body = enemiesData[selectedEnemy].pt.body;
+            var ai_legs = enemiesData[selectedEnemy].pt.legs;
+
+            var shoot_part = document.getElementById("bodyPart").value;
+            var damageCount = document.getElementById("damageCount").value;
+            var fix_multi = document.getElementById("fix").value;
+
+            var totalDamage = (wp_damage * ((wp[shoot_part] + fix_multi) * wp.buff - (ai.pt[shoot_part]) - ai.pt.abs ) * (1 - ai.pt.res) * damageCount).toFixed(0);
+            var currHealth = (ai.hp + ai.ap - totalDamage).toFixed(0);
+
+            // 显示结果
+            document.getElementById("formula").innerText = "计算公式为：" + '(' + wp_damage + '*' + wp[shoot_part] + '*' + wp.buff + '-' + ai.pt[shoot_part] + ')' + '-' + ai.pt.abs + ')' + '*' + '(' + 1 + '-' + '(' + ai.pt.res + ')' + ')' + '*' + damageCount;
+            document.getElementById("res_dmg").innerText = "总伤害为：" + totalDamage;
+            document.getElementById("res_dmg_pcnt").innerText = (totalDamage / (ai.hp + ai.ap) * 100).toFixed(1) + '%';
+            document.getElementById("curr_health").innerText = "BOSS剩余：" + currHealth;
+            document.getElementById("curr_health_pcnt").innerText = (100 - totalDamage / (ai.hp + ai.ap) * 100).toFixed(1) + '%';
+        }
+    </script>
+</body>
+</html>
+
