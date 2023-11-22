@@ -332,7 +332,7 @@ th {
             document.getElementById("formula").innerText = "计算公式为：" + "(" + wp_damage + "*" + "(" + (wp[shoot_part] + fix_multi) + "*" + wp.buff + "-" + ai.pt[shoot_part] + ")" + "-" + ai.pt.abs + ")" + "*" + "(" + 1 + "-" + "(" + ai.pt.res + ")" + ")" + "*" + damageCount;
             document.getElementById("res_dmg").innerText = "总伤害为：" + totalDamage;
             document.getElementById("res_dmg_pcnt").innerText = (totalDamage / (ai.hp + ai.ap) * 100).toFixed(1) + '%';
-            document.getElementById("curr_health").innerText = "BOSS剩余：" + currHealth;
+            document.getElementById("curr_health").innerText = "敌人剩余：" + currHealth;
             document.getElementById("curr_health_pcnt").innerText = (100 - totalDamage / (ai.hp + ai.ap) * 100).toFixed(1) + '%';
         }
     </script>
