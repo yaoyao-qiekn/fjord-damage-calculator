@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>英灵殿别墅 伤害计算器</title>
+    <title>英灵殿别墅 伤害计算器 (手动输入)</title>
     <link rel="icon" href="warface-ico.png">
     <style>
 html,body,article {
@@ -69,14 +69,16 @@ th {
 </head>
 <body>
     <div class="main">
-    <h1>英灵殿别墅 伤害计算器</h1>
-
+    <h1>英灵殿别墅 伤害计算器 (手动输入)</h1>
     <div id="catg_weapons" class="catg">
-    <label for="weapons">武器选择：</label><select id="weapons" onchange="updateWeaponStats()"></select>
-    <br><label for="damage">武器伤害：</label><span id="damageValue"></span>
-    <br><label for="multiplier"></label><!--武器倍率--><span id="multiplierValue"></span>
+    <label for="damage">武器伤害：</label><input type="number" id="input_damage" value="100">
+    <br><label for="rate">武器射速：</label><input type="number" id="input_rate" value="600">
+    <br><label for="head">头部倍率：</label><input type="number" id="input_head" value="5">
+    <br><label for="body">身体倍率：</label><input type="number" id="input_body" value="1">
+    <br><label for="legs">四肢倍率：</label><input type="number" id="input_legs" value="1">
+    <br><label for="buff">僵尸增益：</label><input type="number" id="input_buff" value="1">
     <br><label for="fix">倍率修正：</label><input type="number" id="fix" value="0.00">
-    <br><a href="input.html">手动输入武器数值版</a>
+    <br><a href="index.html">返回</a>
     <br><br>
     </div>
 
@@ -127,77 +129,7 @@ th {
 
     <script>
         <!--yaoyao_qiekn Weapons config-->
-        // 武器数据
-        var weaponsData = {
-          'IWI卡梅尔': {
-            'damage' : 166,
-            'rate' : 0,
-            'head' : 6,
-            'body' : 1.05,
-            'legs' : 1.05,
-            'buff' : 1
-          },
-          'HK433': {
-            'damage' : 102,
-            'rate' : 750,
-            'head' : 6,
-            'body' : 1.05,
-            'legs' : 1.05,
-            'buff' : 1
-          },
-          '27狙' : {
-            'damage': 230,
-            'rate': 255,
-            'head' : 5,
-            'body' : 1.2,
-            'legs' : 1.05,
-            'buff' : 1
-          },
-          'Kalashnikov USA Komrad 12' : {
-            'damage': 1064,
-            'rate': 190,
-            'head' : 1.42,
-            'body' : 1.06,
-            'legs' : 0.94,
-            'buff' : 1
-          },
-          'PKM Zenit' : {
-            'damage': 145,
-            'rate': 440,
-            'head' : 5.5,
-            'body' : 1,
-            'legs' : 1.05,
-            'buff' : 1
-          },
-        }
-        // 动态生成武器下拉框的选项
-        var weaponsSelect = document.getElementById('weapons');
-        Object.keys(weaponsData).forEach(type => {
-            var option = document.createElement('option');
-            option.value = type;
-            option.text = type;
-            weaponsSelect.add(option);
-        });
-
-        function updateWeaponStats() {
-            // 获取选择的武器类型
-            var selectWeapon = document.getElementById('weapons').value;
-
-            // 更新页面上的武器伤害和倍率
-            var damageElement = document.getElementById('damageValue');
-            var multiplierElement = document.getElementById('multiplierValue');
-
-            damageElement.innerText = weaponsData[selectWeapon].damage;
-            multiplierElement.innerText = '头部倍率：' + weaponsData[selectWeapon].head + ' ' +
-                                          '\n身体倍率：' + weaponsData[selectWeapon].body + ' ' +
-                                          '\n四肢倍率：' + weaponsData[selectWeapon].legs;
-        }
-
-        // 初始更新一次，以显示默认武器的数据
-        updateWeaponStats();
-
         <!--[to-do] yaoyao_qiekn mods config-->
-
         <!--yaoyao_qiekn AI config-->
         var enemiesData = {
           '重炮小BOSS': {
@@ -314,31 +246,30 @@ th {
 
     
         function calculateDamage() {
-            var selectedWeapon = document.getElementById("weapons").value;
-            var wp = weaponsData[selectedWeapon];
-            var wp_damage = weaponsData[selectedWeapon].damage;
-            var wp_head = weaponsData[selectedWeapon].head;
-            var wp_body = weaponsData[selectedWeapon].body;
-            var wp_legs = weaponsData[selectedWeapon].legs;
+            // weapons
+            var wp_damage = parseFloat(document.getElementById("input_damage").value);
+            var wp_rate = parseFloat(document.getElementById("input_rate").value);
+            var wp_head = parseFloat(document.getElementById("input_head").value);
+            var wp_body = parseFloat(document.getElementById("input_body").value);
+            var wp_legs = parseFloat(document.getElementById("input_legs").value);
+            var wp_buff = parseFloat(document.getElementById("input_buff").value);
 
+            // enemies
             var selectedEnemy = document.getElementById("enemies").value;
             var ai = enemiesData[selectedEnemy];
-            var ai_hp = enemiesData[selectedEnemy].hp;
-            var ai_ap = enemiesData[selectedEnemy].ar;
-            var ai_head = enemiesData[selectedEnemy].pt.head;
-            var ai_body = enemiesData[selectedEnemy].pt.body;
-            var ai_legs = enemiesData[selectedEnemy].pt.legs;
 
-            var shoot_part = document.getElementById("bodyPart").value;
+            // shooting config
+            var shoot_part = "wp_" + document.getElementById("bodyPart").value;
+            var hit_part = document.getElementById("bodyPart").value;
             var damageCount = parseFloat(document.getElementById("damageCount").value);
             var fix_multi = parseFloat(document.getElementById("fix").value);
 
-            var totalDamage = ((wp_damage * ((wp[shoot_part] + fix_multi) * wp.buff - (ai.pt[shoot_part])) - ai.pt.abs ) * (1 - ai.pt.res) * damageCount).toFixed(1);
-            console.log(typeof damageCount)
+            // calculator
+            var totalDamage = ((wp_damage * ((eval(shoot_part) + fix_multi) * wp_buff - (ai.pt[hit_part])) - ai.pt.abs ) * (1 - ai.pt.res) * damageCount).toFixed(1);
             var currHealth = (ai.hp + ai.ap - totalDamage).toFixed(1);
 
-            // 显示结果
-            document.getElementById("formula").innerText = "计算公式为：" + "(" + wp_damage + "*" + "(" + (wp[shoot_part] + fix_multi) + "*" + wp.buff + "-" + ai.pt[shoot_part] + ")" + "-" + ai.pt.abs + ")" + "*" + "(" + 1 + "-" + "(" + ai.pt.res + ")" + ")" + "*" + damageCount;
+            // result
+            document.getElementById("formula").innerText = "计算公式为：" + "(" + wp_damage + "*" + "(" + (eval(shoot_part) + fix_multi) + "*" + wp_buff + "-" + ai.pt[hit_part] + ")" + "-" + ai.pt.abs + ")" + "*" + "(" + 1 + "-" + "(" + ai.pt.res + ")" + ")" + "*" + damageCount;
             document.getElementById("res_dmg").innerText = "总伤害为：" + totalDamage;
             document.getElementById("res_dmg_pcnt").innerText = (totalDamage / (ai.hp + ai.ap) * 100).toFixed(1) + '%';
             document.getElementById("curr_health").innerText = "敌人剩余：" + currHealth;
