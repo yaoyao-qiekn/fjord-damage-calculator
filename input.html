@@ -149,7 +149,7 @@ a:hover {
               'body': -1,
               'legs': -1,
               'abs': 20,
-              'res': 0.8
+              'res': 0.8,
             }
           },
           '中井AI': {
@@ -161,7 +161,7 @@ a:hover {
               'body': 0,
               'legs': 0,
               'abs': 0,
-              'res': 0
+              'res': 0,
             }
           },
           '突袭兵': {
@@ -172,7 +172,7 @@ a:hover {
               'body': -1,
               'legs': -1,
               'abs': 20,
-              'res': 0.7
+              'res': 0.7,
             }
           },
           '近战手': {
@@ -183,7 +183,7 @@ a:hover {
               'body': -1,
               'legs': -1,
               'abs': 20,
-              'res': 0.7
+              'res': 0.7,
             }
           },
           '狙击手': {
@@ -194,7 +194,7 @@ a:hover {
               'body': -1,
               'legs': -1,
               'abs': 20,
-              'res': 0.5
+              'res': 0.5,
             }
           },
           '火箭筒兵': {
@@ -205,7 +205,7 @@ a:hover {
               'body': -1,
               'legs': -1,
               'abs': 20,
-              'res': 0.5
+              'res': 0.5,
             }
           },
           '重装士兵(盾牌哥)': {
@@ -216,7 +216,57 @@ a:hover {
               'body': -1,
               'legs': -1,
               'abs': 20,
-              'res': 0.7
+              'res': 0.7,
+            }
+          },
+          '阿尔法': {
+            'hp': 400,
+            'ap': 500,
+            'pt': {
+              'head': 0,
+              'body': -1,
+              'legs': -1,
+              'abs': 15,
+              'res': 0.7,
+              'mul': 2
+            }
+          },
+          '打手': {
+            'hp': 800,
+            'ap': 1000,
+            'note': '背着EMP的叫打手2.0',
+            'pt': {
+              'head': 0,
+              'body': -1,
+              'legs': -1,
+              'abs': 20,
+              'res': 0.7,
+              'mul': 2
+            }
+          },
+          '尖叫者': {
+            'hp': 350,
+            'ap': 350,
+            'pt': {
+              'head': 0,
+              'body': -1,
+              'legs': -1,
+              'abs': 0,
+              'res': 0.7,
+              'mul': 2
+            }
+          },
+          '原形': {
+            'hp': 3000,
+            'ap': 2000,
+            'note': '带护盾的赛博格',
+            'pt': {
+              'head': 0,
+              'body': -1,
+              'legs': -1,
+              'abs': 20,
+              'res': 0.7,
+              'mul': 2
             }
           },
         }
@@ -253,7 +303,7 @@ a:hover {
         }
         updateEnemiesStats();
 
-    
+
         function calculateDamage() {
             // weapons
             var wp_damage = parseFloat(document.getElementById("input_damage").value);
@@ -275,10 +325,20 @@ a:hover {
 
             // calculator
             var totalDamage = ((wp_damage * ((eval(shoot_part) + fix_multi) * wp_buff - (ai.pt[hit_part])) - ai.pt.abs ) * (1 - ai.pt.res) * damageCount).toFixed(1);
+            if (ai.pt.mul !== undefined) {
+              // 对于赛博格类敌人，计算头部额外倍率
+              totalDamage *= 2;
+            }
             var currHealth = (ai.hp + ai.ap - totalDamage).toFixed(1);
 
             // result
-            document.getElementById("formula").innerText = "计算公式为：" + "(" + wp_damage + "*" + "(" + (eval(shoot_part) + fix_multi) + "*" + wp_buff + "-" + ai.pt[hit_part] + ")" + "-" + ai.pt.abs + ")" + "*" + "(" + 1 + "-" + "(" + ai.pt.res + ")" + ")" + "*" + damageCount;
+            if (ai.pt.mul !== undefined && shoot_part === "wp_head"){
+              console.log("赛博格打头")
+              document.getElementById("formula").innerText = "计算公式为：" + "(" + wp_damage + "*" + "(" + (eval(shoot_part) + fix_multi) + "*" + wp_buff + "-" + ai.pt[hit_part] + ")" + "-" + ai.pt.abs + ")" + "*" + "(" + 1 + "-" + "(" + ai.pt.res + ")" + ")" + "*" + ai.pt.mul + "*" + damageCount;
+            } else {
+              console.log("赛博格不打头")
+              document.getElementById("formula").innerText = "计算公式为：" + "(" + wp_damage + "*" + "(" + (eval(shoot_part) + fix_multi) + "*" + wp_buff + "-" + ai.pt[hit_part] + ")" + "-" + ai.pt.abs + ")" + "*" + "(" + 1 + "-" + "(" + ai.pt.res + ")" + ")" + "*" + damageCount;
+            }
             document.getElementById("res_dmg").innerText = "总伤害为：" + totalDamage;
             document.getElementById("res_dmg_pcnt").innerText = (totalDamage / (ai.hp + ai.ap) * 100).toFixed(1) + '%';
             document.getElementById("curr_health").innerText = "敌人剩余：" + currHealth;
