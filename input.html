@@ -325,7 +325,7 @@ a:hover {
 
             // calculator
             var totalDamage = ((wp_damage * ((eval(shoot_part) + fix_multi) * wp_buff - ai.pt[hit_part]) - ai.pt.abs ) * (1 - ai.pt.res) * damageCount).toFixed(1);
-            if (ai.pt.mul !== undefined) {
+            if (ai.pt.mul !== undefined && shoot_part === "wp_head") {
               // 对于赛博格类敌人，计算头部额外倍率
               totalDamage = ((wp_damage * ((eval(shoot_part) + fix_multi) * wp_buff * ai.pt.mul - ai.pt[hit_part]) - ai.pt.abs ) * (1 - ai.pt.res) * damageCount).toFixed(1);
             }
