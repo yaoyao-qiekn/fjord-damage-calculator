@@ -140,6 +140,29 @@ a:hover {
         <!--yaoyao_qiekn Weapons config-->
         // 武器数据
         var weaponsData = {
+          '黄金SA' : {
+            'damage': 105,
+            'rate': 725,
+            'head' : 6,
+            'body' : 1.1,
+            'legs' : 1,
+            'buff' : 1
+          },
+          'STK CMCR(身体射速)': {
+            'damage' : 110,
+            'rate' : 923,
+            'head' : 4,
+            'body' : 1.41,
+            'legs' : 1.25,
+            'buff' : 1
+          },
+          'STK CMCR (170高伤害)': {
+            'damage' : 170,
+            'head' : 4,
+            'body' : 1.25,
+            'legs' : 1.25,
+            'buff' : 1
+          },
           'IWI卡梅尔': {
             'damage' : 166,
             'rate' : 0,
@@ -172,6 +195,14 @@ a:hover {
             'legs' : 1.05,
             'buff' : 1.5
           },
+          '27狙(双发)' : {
+            'damage': 320,
+            'rate': 140,
+            'head' : 5,
+            'body' : 1.2,
+            'legs' : 1.05,
+            'buff' : 1.5
+          },
           '27狙(黄金)' : {
             'damage': 230,
             'rate': 260,
@@ -183,6 +214,14 @@ a:hover {
           'Kalashnikov USA Komrad 12' : {
             'damage': 1064,
             'rate': 190,
+            'head' : 1.42,
+            'body' : 1.06,
+            'legs' : 0.94,
+            'buff' : 1
+          },
+          'Kalashnikov USA Komrad 12(速射模组)' : {
+            'damage': 516,
+            'rate': 380,
             'head' : 1.42,
             'body' : 1.06,
             'legs' : 0.94,
@@ -203,6 +242,14 @@ a:hover {
             'body' : 1,
             'legs' : 0.8,
             'buff' : 2
+          },
+          'SIG MPX Copperhead(single)' : {
+            'damage': 102,
+            'rate': 732,
+            'head' : 6.97,
+            'body' : 1.15,
+            'legs' : 1,
+            'buff' : 1
           },
         }
         // 动态生成武器下拉框的选项
@@ -417,7 +464,7 @@ a:hover {
             var damageCount = parseFloat(document.getElementById("damageCount").value);
             var fix_multi = parseFloat(document.getElementById("fix").value);
 
-            var totalDamage = ((wp_damage * ((wp[shoot_part] + fix_multi) * wp.buff - (ai.pt[shoot_part])) - ai.pt.abs ) * (1 - ai.pt.res) * damageCount).toFixed(1);
+            var totalDamage = ((wp_damage * ((wp[shoot_part] + fix_multi) - (ai.pt[shoot_part])) - ai.pt.abs ) * (1 - ai.pt.res) * damageCount).toFixed(1);
             if (ai.pt.mul !== undefined && shoot_part === "head") {
               // 对于赛博格类敌人，计算头部额外倍率
               totalDamage = ((wp_damage * ((wp[shoot_part] + fix_multi) * wp.buff * ai.pt.mul - ai.pt[shoot_part]) - ai.pt.abs ) * (1 - ai.pt.res) * damageCount).toFixed(1);
@@ -430,7 +477,7 @@ a:hover {
               document.getElementById("formula").innerText = "计算公式为：" + "(" + wp_damage + "*" + "(" + (wp[shoot_part] + fix_multi) + "*" + wp.buff + "*" + ai.pt.mul + "-" + ai.pt[shoot_part] + ")" + "-" + ai.pt.abs + ")" + "*" + "(" + 1 + "-" + "(" + ai.pt.res + ")" + ")" + "*" + damageCount;
             } else {
               console.log("不是赛博格打头");
-              document.getElementById("formula").innerText = "计算公式为：" + "(" + wp_damage + "*" + "(" + (wp[shoot_part] + fix_multi) + "*" + wp.buff + "-" + ai.pt[shoot_part] + ")" + "-" + ai.pt.abs + ")" + "*" + "(" + 1 + "-" + "(" + ai.pt.res + ")" + ")" + "*" + damageCount;
+              document.getElementById("formula").innerText = "计算公式为：" + "(" + wp_damage + "*" + "(" + (wp[shoot_part] + fix_multi) +  "-" + ai.pt[shoot_part] + ")" + "-" + ai.pt.abs + ")" + "*" + "(" + 1 + "-" + "(" + ai.pt.res + ")" + ")" + "*" + damageCount;
             }
             document.getElementById("res_dmg").innerText = "总伤害为：" + totalDamage;
             document.getElementById("res_dmg_pcnt").innerText = (totalDamage / (ai.hp + ai.ap) * 100).toFixed(1) + '%';

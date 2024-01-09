@@ -324,7 +324,7 @@ a:hover {
             var fix_multi = parseFloat(document.getElementById("fix").value);
 
             // calculator
-            var totalDamage = ((wp_damage * ((eval(shoot_part) + fix_multi) * wp_buff - ai.pt[hit_part]) - ai.pt.abs ) * (1 - ai.pt.res) * damageCount).toFixed(1);
+            var totalDamage = ((wp_damage * ((eval(shoot_part) + fix_multi) - ai.pt[hit_part]) - ai.pt.abs ) * (1 - ai.pt.res) * damageCount).toFixed(1);
             if (ai.pt.mul !== undefined && shoot_part === "wp_head") {
               // 对于赛博格类敌人，计算头部额外倍率
               totalDamage = ((wp_damage * ((eval(shoot_part) + fix_multi) * wp_buff * ai.pt.mul - ai.pt[hit_part]) - ai.pt.abs ) * (1 - ai.pt.res) * damageCount).toFixed(1);
@@ -334,7 +334,7 @@ a:hover {
             // result
             if (ai.pt.mul !== undefined && shoot_part === "wp_head"){
               console.log("赛博格打头")
-              document.getElementById("formula").innerText = "计算公式为：" + "(" + wp_damage + "*" + "(" + (eval(shoot_part) + fix_multi) + "*" + wp_buff + "*" + ai.pt.mul + "-" + ai.pt[hit_part] + ")" + "-" + ai.pt.abs + ")" + "*" + "(" + 1 + "-" + "(" + ai.pt.res + ")" + ")" + "*" + damageCount;
+              document.getElementById("formula").innerText = "计算公式为：" + "(" + wp_damage + "*" + "(" + (eval(shoot_part) + fix_multi) + "*" + ai.pt.mul + "-" + ai.pt[hit_part] + ")" + "-" + ai.pt.abs + ")" + "*" + "(" + 1 + "-" + "(" + ai.pt.res + ")" + ")" + "*" + damageCount;
             } else {
               console.log("不是赛博格打头")
               document.getElementById("formula").innerText = "计算公式为：" + "(" + wp_damage + "*" + "(" + (eval(shoot_part) + fix_multi) + "*" + wp_buff + "-" + ai.pt[hit_part] + ")" + "-" + ai.pt.abs + ")" + "*" + "(" + 1 + "-" + "(" + ai.pt.res + ")" + ")" + "*" + damageCount;
