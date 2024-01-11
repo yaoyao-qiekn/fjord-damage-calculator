@@ -146,7 +146,7 @@ a:hover {
             'head' : 6,
             'body' : 1.1,
             'legs' : 1,
-            'buff' : 1
+            'buff' : 1.5
           },
           'STK CMCR(身体射速)': {
             'damage' : 110,
@@ -159,7 +159,7 @@ a:hover {
           'STK CMCR (170高伤害)': {
             'damage' : 170,
             'head' : 4,
-            'body' : 1.25,
+            'body' : 1.125,
             'legs' : 1.25,
             'buff' : 1
           },
@@ -369,6 +369,7 @@ a:hover {
             }
           },
           '阿尔法': {
+            'cyborg': 1,
             'hp': 400,
             'ap': 500,
             'pt': {
@@ -381,6 +382,7 @@ a:hover {
             }
           },
           '打手': {
+            'cyborg': 1,
             'hp': 800,
             'ap': 1000,
             'note': '背着EMP的叫打手2.0',
@@ -394,6 +396,7 @@ a:hover {
             }
           },
           '尖叫者': {
+            'cyborg': 1,
             'hp': 350,
             'ap': 350,
             'pt': {
@@ -406,6 +409,7 @@ a:hover {
             }
           },
           '原形': {
+            'cyborg': 1,
             'hp': 3000,
             'ap': 2000,
             'note': '带护盾的赛博格',
@@ -453,44 +457,55 @@ a:hover {
         updateEnemiesStats();
 
         function calculateDamage() {
-            var selectedWeapon = document.getElementById("weapons").value;
-            var wp = weaponsData[selectedWeapon];
-            var wp_damage = weaponsData[selectedWeapon].damage;
-            var wp_head = weaponsData[selectedWeapon].head;
-            var wp_body = weaponsData[selectedWeapon].body;
-            var wp_legs = weaponsData[selectedWeapon].legs;
+          var selectedWeapon = document.getElementById("weapons").value;
+          var wp = weaponsData[selectedWeapon];
+          var wp_damage = weaponsData[selectedWeapon].damage;
+          var wp_head = weaponsData[selectedWeapon].head;
+          var wp_body = weaponsData[selectedWeapon].body;
+          var wp_legs = weaponsData[selectedWeapon].legs;
 
-            var selectedEnemy = document.getElementById("enemies").value;
-            var ai = enemiesData[selectedEnemy];
-            var ai_hp = enemiesData[selectedEnemy].hp;
-            var ai_ap = enemiesData[selectedEnemy].ar;
-            var ai_head = enemiesData[selectedEnemy].pt.head;
-            var ai_body = enemiesData[selectedEnemy].pt.body;
-            var ai_legs = enemiesData[selectedEnemy].pt.legs;
+          var selectedEnemy = document.getElementById("enemies").value;
+          var ai = enemiesData[selectedEnemy];
+          var ai_hp = enemiesData[selectedEnemy].hp;
+          var ai_ap = enemiesData[selectedEnemy].ar;
+          var ai_head = enemiesData[selectedEnemy].pt.head;
+          var ai_body = enemiesData[selectedEnemy].pt.body;
+          var ai_legs = enemiesData[selectedEnemy].pt.legs;
 
-            var shoot_part = document.getElementById("bodyPart").value;
-            var damageCount = parseFloat(document.getElementById("damageCount").value);
-            var fix_multi = parseFloat(document.getElementById("fix").value);
+          var shoot_part = document.getElementById("bodyPart").value;
+          var damageCount = parseFloat(document.getElementById("damageCount").value);
+          var fix_multi = parseFloat(document.getElementById("fix").value);
 
-            var totalDamage = ((wp_damage * ((wp[shoot_part] + fix_multi) - (ai.pt[shoot_part])) - ai.pt.abs ) * (1 - ai.pt.res) * damageCount).toFixed(1);
-            if (ai.pt.mul !== undefined && shoot_part === "head") {
-              // 对于赛博格类敌人，计算头部额外倍率
-              totalDamage = ((wp_damage * ((wp[shoot_part] + fix_multi) * wp.buff * ai.pt.mul - ai.pt[shoot_part]) - ai.pt.abs ) * (1 - ai.pt.res) * damageCount).toFixed(1);
-            }
-            var currHealth = (ai.hp + ai.ap - totalDamage).toFixed(1);
+          // 伤害计算
+          var totalDamage = ((wp_damage * ((wp[shoot_part] + fix_multi) - (ai.pt[shoot_part])) - ai.pt.abs ) * (1 - ai.pt.res) * damageCount).toFixed(1);
+          // 赛博格敌人非爆头
+          if (ai.cyborg == 1 && wp.buff >= 1) {
+            totalDamage == ((wp_damage * ((wp[shoot_part] + fix_multi) * wp.buff - (ai.pt[shoot_part])) - ai.pt.abs ) * (1 - ai.pt.res) * damageCount).toFixed(1);
+          }
+          // 赛博格类爆头头部额外倍率
+          if (ai.pt.mul !== undefined && shoot_part === "head") {
+            totalDamage = ((wp_damage * ((wp[shoot_part] + fix_multi) * wp.buff * ai.pt.mul - ai.pt[shoot_part]) - ai.pt.abs ) * (1 - ai.pt.res) * damageCount).toFixed(1);
+          }
+          var currHealth = (ai.hp + ai.ap - totalDamage).toFixed(1);
 
-            // 显示结果
+          // 显示结果
+          if (ai.cyborg == 1) {
+            console.log("是赛博格");
             if (ai.pt.mul !== undefined && shoot_part === "head"){
               console.log("赛博格打头")
               document.getElementById("formula").innerText = "计算公式为：" + "(" + wp_damage + "*" + "(" + (wp[shoot_part] + fix_multi) + "*" + wp.buff + "*" + ai.pt.mul + "-" + ai.pt[shoot_part] + ")" + "-" + ai.pt.abs + ")" + "*" + "(" + 1 + "-" + "(" + ai.pt.res + ")" + ")" + "*" + damageCount;
             } else {
-              console.log("不是赛博格打头");
-              document.getElementById("formula").innerText = "计算公式为：" + "(" + wp_damage + "*" + "(" + (wp[shoot_part] + fix_multi) +  "-" + ai.pt[shoot_part] + ")" + "-" + ai.pt.abs + ")" + "*" + "(" + 1 + "-" + "(" + ai.pt.res + ")" + ")" + "*" + damageCount;
+              console.log("赛博格不打头")
+              document.getElementById("formula").innerText = "计算公式为：" + "(" + wp_damage + "*" + "(" + (wp[shoot_part] + fix_multi) + "*" + wp.buff + "-" + ai.pt[shoot_part] + ")" + "-" + ai.pt.abs + ")" + "*" + "(" + 1 + "-" + "(" + ai.pt.res + ")" + ")"+ "*" + damageCount;
             }
-            document.getElementById("res_dmg").innerText = "总伤害为：" + totalDamage;
-            document.getElementById("res_dmg_pcnt").innerText = (totalDamage / (ai.hp + ai.ap) * 100).toFixed(1) + '%';
-            document.getElementById("curr_health").innerText = "敌人剩余：" + currHealth;
-            document.getElementById("curr_health_pcnt").innerText = (100 - totalDamage / (ai.hp + ai.ap) * 100).toFixed(1) + '%';
+          } else {
+            console.log("不是赛博格打头");
+            document.getElementById("formula").innerText = "计算公式为：" + "(" + wp_damage + "*" + "(" + (wp[shoot_part] + fix_multi) +  "-" + ai.pt[shoot_part] + ")" + "-" + ai.pt.abs + ")" + "*" + "(" + 1 + "-" + "(" + ai.pt.res + ")" + ")" + "*" + damageCount;
+          }
+          document.getElementById("res_dmg").innerText = "总伤害为：" + totalDamage;
+          document.getElementById("res_dmg_pcnt").innerText = (totalDamage / (ai.hp + ai.ap) * 100).toFixed(1) + '%';
+          document.getElementById("curr_health").innerText = "敌人剩余：" + currHealth;
+          document.getElementById("curr_health_pcnt").innerText = (100 - totalDamage / (ai.hp + ai.ap) * 100).toFixed(1) + '%';
         }
     </script>
 </body>
