@@ -480,7 +480,7 @@ a:hover {
           var totalDamage = ((wp_damage * ((wp[shoot_part] + fix_multi) - (ai.pt[shoot_part])) - ai.pt.abs ) * (1 - ai.pt.res) * damageCount).toFixed(1);
           // 赛博格敌人非爆头
           if (ai.cyborg == 1 && wp.buff >= 1) {
-            totalDamage == ((wp_damage * ((wp[shoot_part] + fix_multi) * wp.buff - (ai.pt[shoot_part])) - ai.pt.abs ) * (1 - ai.pt.res) * damageCount).toFixed(1);
+            totalDamage = ((wp_damage * ((wp[shoot_part] + fix_multi) * wp.buff - (ai.pt[shoot_part])) - ai.pt.abs ) * (1 - ai.pt.res) * damageCount).toFixed(1);
           }
           // 赛博格类爆头头部额外倍率
           if (ai.pt.mul !== undefined && shoot_part === "head") {
